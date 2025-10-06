@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import {
   Search,
   Upload,
-  Plus,
   Filter,
   List,
   MoreHorizontal,
@@ -17,9 +16,6 @@ import {
   Archive,
   Clock,
   Folder,
-  Settings,
-  MessageCircle,
-  HelpCircle,
   BarChart3,
   Menu,
   LucideIcon,
@@ -27,7 +23,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -38,13 +33,6 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import toast from "react-hot-toast";
 
-const fileTypeColors = {
-  Documents: "bg-blue-500",
-  Image: "bg-purple-500",
-  Video: "bg-purple-300",
-  Audio: "bg-yellow-500",
-  ZIP: "bg-red-500"
-};
 
 const sidebarItems = [
   { icon: BarChart3, label: "Dashboard", active: true },
@@ -120,7 +108,7 @@ export default function FileManagerDashboard() {
     } catch (error) {
       console.error('Error fetching files:', error);
       setLoading(false)
-      // toast.error("failed to get the files")
+      toast.error("failed to get the files")
     } finally {
       setLoading(false)
     }
@@ -238,24 +226,7 @@ export default function FileManagerDashboard() {
         </nav>
       </div>
 
-      {/* Other section */}
-      <div className="border-border border-t p-4">
-        <div className="text-muted-foreground mb-4 text-xs font-medium">Other</div>
-        <nav className="space-y-1">
-          <button className="text-muted-foreground hover:text-foreground hover:bg-accent flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors">
-            <Settings className="h-4 w-4" />
-            Settings
-          </button>
-          <button className="text-muted-foreground hover:text-foreground hover:bg-accent flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors">
-            <MessageCircle className="h-4 w-4" />
-            Chat & Support
-          </button>
-          <button className="text-muted-foreground hover:text-foreground hover:bg-accent flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors">
-            <HelpCircle className="h-4 w-4" />
-            Help Center
-          </button>
-        </nav>
-      </div>
+    
     </>
   );
 
@@ -267,33 +238,7 @@ export default function FileManagerDashboard() {
           <CardTitle className="text-lg">Storage usage</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-6 flex flex-col items-center">
-            <div className="relative mb-4 h-32 w-32">
-              <svg className="h-32 w-32 -rotate-90 transform" viewBox="0 0 36 36">
-                <path
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-muted"
-                />
-                <path
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeDasharray="65, 100"
-                  className="text-purple-600"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <Folder className="text-muted-foreground mb-1 h-6 w-6" />
-                <div className="text-2xl font-bold">104.6 GB</div>
-                <div className="text-muted-foreground text-xs">of 256 GB</div>
-              </div>
-            </div>
-          </div>
-
+         
           <div className="space-y-4">
             {storageData.map((item, index) => (
               <div key={index} className="flex items-center gap-3">
@@ -311,24 +256,6 @@ export default function FileManagerDashboard() {
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Upgrade section */}
-      <Card>
-        <CardContent className="p-6 text-center">
-          <div className="bg-muted mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
-            <div className="border-muted-foreground flex h-6 w-6 items-center justify-center rounded-full border-2">
-              <span className="text-xs font-bold">$</span>
-            </div>
-          </div>
-          <h3 className="mb-2 font-semibold">Get more space for your files</h3>
-          <p className="text-muted-foreground mb-4 text-sm">
-            Upgrade your account to pro to get more storage
-          </p>
-          <Button className="w-full bg-gray-900 text-white hover:bg-gray-800">
-            Upgrade to pro
-          </Button>
         </CardContent>
       </Card>
     </>
@@ -397,30 +324,9 @@ export default function FileManagerDashboard() {
               <Upload className="h-4 w-4 lg:mr-2" />
               <span className="hidden sm:inline">{upLoading ? "Uploading..." : "Upload File"}</span>
             </Button>
-            <Button variant="outline" size="sm" className="hidden bg-transparent sm:flex">
-              <Plus className="mr-2 h-4 w-4" />
-              Create
-            </Button>
             <Button variant="ghost" size="icon">
               <Bell className="h-4 w-4" />
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="/robert-fox-profile.png" />
-                    <AvatarFallback>RF</AvatarFallback>
-                  </Avatar>
-                  <span className="hidden md:inline">Robert Fox</span>
-                  <ChevronDown className="hidden h-4 w-4 md:inline" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem>Sign out</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </header>
 
