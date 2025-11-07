@@ -29,6 +29,5 @@ export function getFileType(contentType: string): string {
     if (contentType.startsWith('video/')) return 'Video';
     if (contentType.startsWith('audio/')) return 'Audio';
     if (contentType.includes('zip') || contentType.includes('compressed')) return 'ZIP';
-    if (contentType.startsWith('text') || contentType.includes('utf-8')) return 'Text File';
     return 'Document'
 }
