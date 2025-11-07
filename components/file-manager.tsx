@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Search,
   Upload,
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import toast from "react-hot-toast";
+import { ModeToggle } from "./darkmode-icon";
 
 
 const sidebarItems = [
@@ -86,12 +87,13 @@ const getIconForType = (type: string): LucideIcon => {
 }
 
 export default function FileManagerDashboard() {
-  const [searchQuery, setSearchQuery] = useState("");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isStoragePanelOpen, setIsStoragePanelOpen] = useState(false);
   const [allFiles, setAllFiles] = useState<FileData[]>([]);
   const [storageData, setStorageData] = useState<StorageData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [upLoading, setUploading] = useState(false);
 
   const fetchFiles = async () => {
@@ -195,13 +197,38 @@ export default function FileManagerDashboard() {
     }
   };
 
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300); // Wait 300ms after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const searchFunction = useMemo(() => {
+    const query = debouncedQuery.toLowerCase().trim();
+
+    if (!query) return allFiles;
+
+    return allFiles.filter((file) => {
+      const fileName = file.name.toLowerCase();
+      const fileSize = file.size.toLowerCase();
+      const fileType = file.type.toLowerCase();
+
+      return (
+        fileName.includes(query) || fileSize.includes(query) || fileType.includes(query)
+      )
+    })
+  }, [allFiles, debouncedQuery])
+
   const SidebarContent = () => (
     <>
       {/* Logo */}
       <div className="border-border border-b p-6">
         <div className="flex items-center gap-2">
           <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg">
-            <Folder className="size-4 text-white" />
+            <Folder className="size-4 text-white dark:text-black" />
           </div>
           <span className="text-lg font-semibold">File Manager</span>
         </div>
@@ -214,7 +241,7 @@ export default function FileManagerDashboard() {
           {sidebarItems.map((item) => (
             <button
               key={item.label}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${item.active
+              className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${item.active
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground hover:bg-accent"
                 }`}
@@ -226,7 +253,7 @@ export default function FileManagerDashboard() {
         </nav>
       </div>
 
-    
+
     </>
   );
 
@@ -238,7 +265,7 @@ export default function FileManagerDashboard() {
           <CardTitle className="text-lg">Storage usage</CardTitle>
         </CardHeader>
         <CardContent>
-         
+
           <div className="space-y-4">
             {storageData.map((item, index) => (
               <div key={index} className="flex items-center gap-3">
@@ -324,9 +351,7 @@ export default function FileManagerDashboard() {
               <Upload className="h-4 w-4 lg:mr-2" />
               <span className="hidden sm:inline">{upLoading ? "Uploading..." : "Upload File"}</span>
             </Button>
-            <Button variant="ghost" size="icon">
-              <Bell className="h-4 w-4" />
-            </Button>
+            <ModeToggle />
           </div>
         </header>
 
@@ -336,7 +361,7 @@ export default function FileManagerDashboard() {
             {/* All files header */}
             <div className="mb-6 flex justify-between">
               <div>
-                <h1 className="mb-1 text-xl font-semibold lg:text-2xl">All files</h1>
+                <h1 className="mb-1 text-xl font-semibold lg:text-2xl capitalize">All files</h1>
                 <p className="text-muted-foreground text-sm lg:text-base">
                   All of your files are displayed here
                 </p>
@@ -346,12 +371,7 @@ export default function FileManagerDashboard() {
                   <Filter className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Filter</span>
                 </Button>
-                <Button variant="outline" size="sm">
-                  <List className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">List</span>
-                  <ChevronDown className="ml-1 hidden h-4 w-4 sm:inline" />
-                </Button>
-              </div>
+                </div>
             </div>
 
 
@@ -383,63 +403,70 @@ export default function FileManagerDashboard() {
               </div>
 
               <div className="space-y-3 lg:hidden">
-                {allFiles.map((file, index) => (
-                  <Card key={index} className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-lg">
-                        <file.icon className="text-muted-foreground h-5 w-5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="mb-1 truncate text-sm font-medium">{file.name}</p>
-                        <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                          <span>{file.size}</span>
-                          <span>•</span>
-                          <span>{file.lastModified}</span>
+                {searchFunction.length > 0 ? (
+                  searchFunction.map((file) => (
+                    <Card key={file.key} className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-lg">
+                          <file.icon className="text-muted-foreground h-5 w-5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="mb-1 truncate text-sm font-medium">{file.name}</p>
+                          <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                            <span>{file.size}</span>
+                            <span>•</span>
+                            <span>{file.lastModified}</span>
+                          </div>
                         </div>
                       </div>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  ))) : (
+                  <div className="text-muted-foreground py-8 text-center text-sm">
+                    No files found matching &quot;{searchQuery}&quot;
+                  </div>
+                )}
               </div>
 
               <div className="border-border hidden overflow-hidden rounded-lg border lg:block">
-                <div className="bg-muted/50 border-border text-muted-foreground grid grid-cols-10 gap-4 border-b p-4 text-sm font-medium">
-                  <div className="col-span-5">Name</div>
-                  <div className="col-span-2">File Size</div>
-                  <div className="col-span-2">Date modified</div>
+                <div className="bg-muted/50 border-border text-muted-foreground grid grid-cols-12 gap-4 border-b p-4 text-sm font-medium">
+                  <div className="col-span-3">Name</div>
+                  <div className="col-span-3">Type</div>
+                  <div className="col-span-3">File Size</div>
+                  <div className="col-span-3">Date modified</div>
                 </div>
-                {allFiles.map((file, index) => (
-                  <div
-                    key={index}
-                    className="border-border items-center hover:bg-muted/50 grid grid-cols-10 gap-4 border-b p-4 transition-colors last:border-b-0">
-                    <div className="col-span-5 flex items-center gap-3">
-                      <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-lg">
-                        <file.icon className="text-muted-foreground h-4 w-4" />
+                {searchFunction.length > 0 ? (
+                  searchFunction.map((file) => (
+                    <div
+                      key={file.key}
+                      className="border-border items-center cursor-pointer hover:bg-muted/50 grid grid-cols-20 gap-4 border-b p-4 transition-colors last:border-b-0">
+                      <div className="col-span-5 flex items-center gap-3">
+                        <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-lg">
+                          <file.icon className="text-muted-foreground h-4 w-4" />
+                        </div>
+                        <span className="truncate text-sm font-medium">{file.name}</span>
                       </div>
-                      <span className="truncate text-sm font-medium">{file.name}</span>
+                      <div className="text-muted-foreground col-span-5 text-sm">{file.size}</div>
+                      <div className="text-muted-foreground col-span-5 text-sm">{file.type}</div>
+                      <div className="text-muted-foreground col-span-3 text-sm">{new Date(file.lastModified).toLocaleDateString()}</div>
+                      <div className="col-span-2 flex justify-end ">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="flex items-center gap-2 cursor-pointer">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleDownload(file.key)}>Download Link</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDelete(file.key)}>Delete</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
-                    <div className="text-muted-foreground col-span-2 text-sm">{file.size}</div>
-                    <div className="text-muted-foreground col-span-2 text-sm">{new Date(file.lastModified).toLocaleDateString()}</div>
-                    <div className="col-span-1 flex justify-end">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="flex items-center gap-2">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleDownload(file.key)}>Download Link</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDelete(file.key)}>Delete</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                      <Button variant="ghost" size="icon">
-                      </Button>
-                    </div>
+                  ))) : (
+                  <div className="text-muted-foreground py-8 text-center text-sm">
+                    No files found matching &quot;{searchQuery}&quot;
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
