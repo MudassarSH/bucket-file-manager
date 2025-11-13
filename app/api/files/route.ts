@@ -7,7 +7,8 @@ export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
         const prefix = searchParams.get('prefix') || '';
-        const storage = getStorage();
+        const mode = searchParams.get('mode') || '';
+        const storage = getStorage(mode);
         const { keys, commonPrefixes } = await storage.listPrefixes(prefix);
 
         const files = await Promise.all(
