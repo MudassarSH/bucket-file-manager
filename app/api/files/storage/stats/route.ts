@@ -3,9 +3,11 @@ import { getStorage } from "@/cloud/storage";
 import { formatFileSize, getFileType } from "@/cloud/utils/helper";
 
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
-        const storage = getStorage();
+        const { searchParams } = new URL(req.url);
+        const mode = searchParams.get('mode') || ''
+        const storage = getStorage(mode);
         const { keys } = await storage.listPrefixes('');
 
         const stats = {
