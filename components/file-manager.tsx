@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 import {
   Select,
-  SelectLabel,
   SelectGroup,
   SelectItem,
   SelectTrigger,

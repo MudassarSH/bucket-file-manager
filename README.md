@@ -8,8 +8,9 @@ This file manager provides a complete solution for managing files in the cloud w
 
 ## Key Features
 
-- **Multi-Cloud Support**: Works with both Amazon S3 and Cloudflare R2 storage backends
+- **Multi-Cloud Support**: Works with both Amazon S3 and Cloudflare R2 storage backends with just through the select
 - **Complete File Operations**: Upload, download, view, and delete files
+- **Folder Operations**: Upload, download, view, and delete inside the folder.
 - **Folder Organization**: Navigate through folder structures
 - **Storage Statistics**: View storage usage by file type
 - **Responsive Design**: Works on both desktop and mobile devices
@@ -39,6 +40,7 @@ interface Storage {
 The system currently implements R2 storage using AWS SDK S3 client (since R2 is S3-compatible):
 
 - **R2Storage**: Implements the Storage interface for Cloudflare R2
+- **S3Storage**: Implements the Storage interface for Amazon S3
 - **Storage Factory**: A factory pattern is used to create and configure storage instances
 
 ### API Endpoints
@@ -97,6 +99,19 @@ S3_BUCKET_NAME=your-bucket-name
 ```
 
 ## Getting Started
+
+First, clone the directory:
+
+```bash
+git clone https://github.com/MudassarSH/bucket-file-manager.git
+```
+Install all the dependencies through:
+
+```bash
+npm run install
+# or
+npm run i
+```
 
 First, run the development server:
 
