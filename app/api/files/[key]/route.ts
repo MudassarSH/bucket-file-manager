@@ -3,9 +3,11 @@ import { getStorage } from "@/cloud/storage";
 
 export async function GET(request: Request, { params }: { params: Promise<{ key: string }> }) {
     try {
+        const { searchParams } = new URL(request.url);
+        const mode = searchParams.get('mode');
         const { key } = await params;
         const decoode = decodeURIComponent(key);
-        const storage = getStorage();
+        const storage = getStorage(mode);
         const signedUrl = await storage.getSignedUrl(decoode, 3600);
         return NextResponse.json({ url: signedUrl })
     } catch (error) {
@@ -19,9 +21,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ key:
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ key: string }> }) {
     try {
+        const { searchParams } = new URL(request.url);
+        const mode = searchParams.get('mode') || ''
         const { key } = await params;
         const decoode = decodeURIComponent(key);
-        const storage = getStorage();
+        const storage = getStorage(mode);
         await storage.deleteFile(decoode);
         return NextResponse.json({
             success: true,
