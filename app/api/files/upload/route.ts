@@ -4,6 +4,8 @@ import { buildKey, sanitizeRelativePaths } from "@/cloud/utils/helper";
 
 export async function POST(request: Request) {
     try {
+        const { searchParams } = new URL(request.url);
+        const mode = searchParams.get("mode") || '';
         const formData = await request.formData();
         const file = formData.get('file') as File;
         const path = formData.get('path') as string || '';
@@ -15,7 +17,7 @@ export async function POST(request: Request) {
         const key = buildKey(`${sanitizePath}${file.name}`);
 
         const buffer = Buffer.from(await file.arrayBuffer());
-        const storage = getStorage();
+        const storage = getStorage(mode);
 
         await storage.uploadFile(key, buffer, file.type);
         return NextResponse.json({
